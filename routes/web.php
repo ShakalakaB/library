@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-
+use App\Http\Controllers\LibraryController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -14,9 +14,10 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('library');
 })->name('home');
 
-Route::get('/library', function () {
-    return view('library');
-})->name('library.store');
+Route::prefix('/library')->group(function () {
+    Route::get('/index', [LibraryController::class, 'index'])->name('library.index');
+    Route::post('/add', [LibraryController::class, 'store'])->name('library.store');
+});

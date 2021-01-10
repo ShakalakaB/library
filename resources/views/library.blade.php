@@ -19,7 +19,7 @@
         </style>
     </head>
     <body>
-    <form action="{{ route('home') }}" method="GET">
+    <form action="{{ route('library.index') }}" method="GET">
         <label for="title">Title</label>
         <input type="text" id="title" name="'title"><br>
         <label for="author">Author</label>
