@@ -19,12 +19,25 @@
         </style>
     </head>
     <body>
-    <form action="{{ route('library.index') }}" method="GET">
+    <form action="{{ route('library.store') }}" method="POST">
+        @csrf
         <label for="title">Title</label>
-        <input type="text" id="title" name="'title"><br>
+        <input type="text" id="title" name="title" required="required"><br>
         <label for="author">Author</label>
-        <input type="text" id="author" name="'author"><br>
+        <input type="text" id="author" name="author" required="required"><br>
         <input type="submit">
     </form>
+    <table>
+        <tr>
+            <th>Title</th>
+            <th>Author</th>
+            <th>Action</th>
+        </tr>
+        <tr>
+            <td>{{ $title ?? '' }}</td>
+            <td>{{ $name ?? ''}}</td>
+            <td>action</td>
+        </tr>
+    </table>
     </body>
 </html>
