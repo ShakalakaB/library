@@ -33,11 +33,13 @@
             <th>Author</th>
             <th>Action</th>
         </tr>
+        @foreach ($books as $book)
         <tr>
-            <td>{{ $title ?? '' }}</td>
-            <td>{{ $name ?? ''}}</td>
+            <td>{{ $book['title'] ?? '' }}</td>
+            <td>{{ $book['author']['name'] ?? ''}}</td>
             <td>action</td>
         </tr>
+        @endforeach
     </table>
     </body>
 </html>
