@@ -15,7 +15,7 @@ use App\Http\Controllers\LibraryController;
 
 Route::get('/', function () {
     return view('library');
-})->name('home');
+})->name('library.home');
 
 Route::prefix('/library')->group(function () {
     Route::get('/index', [LibraryController::class, 'index'])->name('library.index');
