@@ -8,7 +8,6 @@
 
         <!-- Fonts -->
         <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
 
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
         <!-- Styles -->
@@ -20,12 +19,12 @@
         </style>
     </head>
     <body>
-    <form action="{{ route('library.store') }}" method="POST">
+    <form action="{{ route('library.update', $editBook['id']) }}" method="POST">
         @csrf
         <label for="title">Title</label>
-        <input type="text" id="title" name="title" required="required"><br>
+        <input type="text" id="title" name="title" value="{{ $editBook['title'] }}" readonly><br>
         <label for="author">Author</label>
-        <input type="text" id="author" name="author" required="required"><br>
+        <input type="text" id="author" name="author" required="required" value="{{ $editBook['author']['name'] }}"><br>
         <input type="submit">
     </form>
     <table>
@@ -38,9 +37,7 @@
         <tr>
             <td>{{ $book['title'] ?? '' }}</td>
             <td>{{ $book['author']['name'] ?? ''}}</td>
-            <td>
-                <a href="{{ route('library.edit', $book['id']) }}"><i class="bi bi-pencil-fill"></i></a>
-            </td>
+            <td>action</td>
         </tr>
         @endforeach
     </table>

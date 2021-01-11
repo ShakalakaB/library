@@ -18,4 +18,6 @@ Route::get('/',  [LibraryController::class, 'index'])->name('library.home');
 Route::prefix('/library')->group(function () {
     Route::get('/index', [LibraryController::class, 'index'])->name('library.index');
     Route::post('/add', [LibraryController::class, 'store'])->name('library.store');
+    Route::get('/edit/{bookId}', [LibraryController::class, 'edit'])->name('library.edit');
+    Route::post('/update/{bookId}', [LibraryController::class, 'update'])->name('library.update');
 });

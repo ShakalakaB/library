@@ -21,7 +21,6 @@ class LibraryController extends Controller
     public function index()
     {
         $books = Book::with('author')->orderBy('created_at', 'desc')
-            ->limit(10)
             ->get()
             ->toArray();
 
@@ -46,10 +45,32 @@ class LibraryController extends Controller
         ]);
 
         $books = Book::with('author')->orderBy('created_at', 'desc')
-            ->limit(10)
             ->get()
             ->toArray();
 
         return view('library', ['books' => $books]);
+    }
+
+    public function edit($bookId)
+    {
+        $book = Book::with('author')->find($bookId)->toArray();
+
+        $books = Book::with('author')->orderBy('created_at', 'desc')
+            ->get()
+            ->toArray();
+
+        return view('libraryUpdate', ['books' => $books, 'editBook' => $book]);
+    }
+
+    public function update($bookId)
+    {
+//        $book = Book::with('author')->find($bookId)->toArray();
+//
+//        $books = Book::with('author')->orderBy('created_at', 'desc')
+//            ->get()
+//            ->toArray();
+
+//        return view('libraryUpdate', ['books' => $books, 'editBook' => $book]);
+        return "update";
     }
 }
