@@ -34,12 +34,12 @@ class LibraryController extends Controller
      */
     public function store(Request $request)
     {
-        $title = $request->input('title'); //todo trim
-        $author = $request->input('author'); //todo trim
+        $title = trim($request->input('title'));
+        $author = trim($request->input('author'));
 
-        $author = Author::create(['name' => $author]);
+        $author = Author::stOrCreate(['name' => $author]);
 
-        Book::create([
+        Book::firstOrCreate([
             'title' => $title,
             'author_id' => $author['id']
         ]);
