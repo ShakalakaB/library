@@ -30,27 +30,28 @@ class LibraryController extends Controller
     /**
      * Store book and author
      * @param Request $request
-     * @return \Illuminate\Contracts\View\View
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function store(Request $request)
     {
-        $title = $request->input('title');
-        $author = $request->input('author');
+        $title = $request->input('title'); //todo trim
+        $author = $request->input('author'); //todo trim
 
         $author = Author::create(['name' => $author]);
 
-        $book = Book::create([
+        Book::create([
             'title' => $title,
             'author_id' => $author['id']
         ]);
 
-        $books = Book::with('author')->orderBy('created_at', 'desc')
-            ->get()
-            ->toArray();
-
-        return view('library', ['books' => $books]);
+        return redirect()->route('library.home');
     }
 
+    /**
+     * Edit book
+     * @param $bookId
+     * @return \Illuminate\Contracts\View\View
+     */
     public function edit($bookId)
     {
         $book = Book::with('author')->find($bookId)->toArray();
@@ -62,15 +63,22 @@ class LibraryController extends Controller
         return view('libraryUpdate', ['books' => $books, 'editBook' => $book]);
     }
 
-    public function update($bookId)
+    /**
+     * Update author
+     * @param $bookId
+     * @param Request $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function update($bookId, Request $request)
     {
-//        $book = Book::with('author')->find($bookId)->toArray();
-//
-//        $books = Book::with('author')->orderBy('created_at', 'desc')
-//            ->get()
-//            ->toArray();
+        $author = trim($request->input('author'));
 
-//        return view('libraryUpdate', ['books' => $books, 'editBook' => $book]);
-        return "update";
+        $author = Author::firstOrCreate(['name' => $author]);
+
+        $book = Book::findOrFail($bookId);
+        $book['author_id'] = $author['id'];
+        $book->save();
+
+        return redirect()->route('library.home');
     }
 }
