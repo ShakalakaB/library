@@ -42,7 +42,7 @@
             <td>{{ $book['author']['name'] ?? ''}}</td>
             <td>
                 <a href="{{ route('library.edit', $book['id']) }}"><i class="bi bi-pencil-fill"></i></a>
-                <i class="bi bi-trash-fill"></i>
+                <a href="{{ route('library.delete', $book['id']) }}"><i class="bi bi-trash-fill"></i></a>
             </td>
         </tr>
         @endforeach

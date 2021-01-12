@@ -20,4 +20,5 @@ Route::prefix('/library')->group(function () {
     Route::post('/add', [LibraryController::class, 'store'])->name('library.store');
     Route::get('/edit/{bookId}', [LibraryController::class, 'edit'])->name('library.edit');
     Route::post('/update/{bookId}', [LibraryController::class, 'update'])->name('library.update');
+    Route::get('/delete/{bookId}', [LibraryController::class, 'delete'])->name('library.delete');
 });

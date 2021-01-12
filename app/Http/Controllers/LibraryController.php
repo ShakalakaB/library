@@ -81,4 +81,16 @@ class LibraryController extends Controller
 
         return redirect()->route('library.home');
     }
+
+    /**
+     * Delete book
+     * @param $bookId
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function delete($bookId)
+    {
+        Book::find($bookId)->delete();
+
+        return redirect()->route('library.home');
+    }
 }

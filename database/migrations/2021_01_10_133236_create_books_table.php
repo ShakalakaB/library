@@ -19,6 +19,7 @@ class CreateBooksTable extends Migration
             $table->foreignId('author_id');
             $table->foreign('author_id')->references('id')->on('authors');
             $table->timestamps();
+            $table->softDeletes($column = 'deleted_at', $precision = 0);
         });
     }
 
