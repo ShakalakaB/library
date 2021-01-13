@@ -30,22 +30,6 @@
         <input type="text" id="author" name="author" required="required"><br>
         <input type="submit">
     </form>
-    <table>
-        <tr>
-            <th>Title</th>
-            <th>Author</th>
-            <th>Action</th>
-        </tr>
-        @foreach ($books as $book)
-        <tr>
-            <td>{{ $book['title'] ?? '' }}</td>
-            <td>{{ $book['author']['name'] ?? ''}}</td>
-            <td>
-                <a href="{{ route('library.edit', $book['id']) }}"><i class="bi bi-pencil-fill"></i></a>
-                <a href="{{ route('library.delete', $book['id']) }}"><i class="bi bi-trash-fill"></i></a>
-            </td>
-        </tr>
-        @endforeach
-    </table>
+    @include('libraryTable', ['books' => $books])
     </body>
 </html>

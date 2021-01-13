@@ -18,11 +18,24 @@ class LibraryController extends Controller
      * Get library index
      * @return \Illuminate\Contracts\View\View
      */
-    public function index()
+    public function index(Request $request)
     {
-        $books = Book::with('author')->orderBy('created_at', 'desc')
-            ->get()
-            ->toArray();
+        $validatedData = $request->validate([
+            'orderBy' => 'in:name,title',
+            'order' => 'required_with:orderBy|in:asc,desc',
+            'page' => 'integer'
+        ]);
+
+        if ($validatedData['orderBy'] ?? '') {
+            $books = Book::with('author')->join('authors', 'books.author_id', '=', 'authors.id')
+                ->orderBy($validatedData['orderBy'], $validatedData['order'])
+                ->paginate(10, 'books.*')
+                ->toArray();
+        } else {
+            $books = Book::with('author')->orderBy('created_at', 'desc')
+                ->paginate(10)
+                ->toArray();
+        }
 
         return view('library', ['books' => $books]);
     }
@@ -34,8 +47,13 @@ class LibraryController extends Controller
      */
     public function store(Request $request)
     {
-        $title = trim($request->input('title'));
-        $author = trim($request->input('author'));
+        $validatedData = $request->validate([
+            'title' => 'required|max:255',
+            'author' => 'required|max:255',
+        ]); //todo custom error
+
+        $title = trim($validatedData['title']);
+        $author = trim($validatedData['author']);
 
         $author = Author::stOrCreate(['name' => $author]);
 
@@ -54,10 +72,10 @@ class LibraryController extends Controller
      */
     public function edit($bookId)
     {
-        $book = Book::with('author')->find($bookId)->toArray();
+        $book = Book::with('author')->find($bookId)->toArray();//todo custom error
 
         $books = Book::with('author')->orderBy('created_at', 'desc')
-            ->get()
+            ->paginate(10)
             ->toArray();
 
         return view('libraryUpdate', ['books' => $books, 'editBook' => $book]);
@@ -71,9 +89,13 @@ class LibraryController extends Controller
      */
     public function update($bookId, Request $request)
     {
-        $author = trim($request->input('author'));
+        $validatedData = $request->validate([
+            'author' => 'required|max:255',
+        ]); //todo custom error
 
-        $author = Author::firstOrCreate(['name' => $author]);
+        $author = trim($validatedData['author']);
+
+        $author = Author::firstOrCreate(['name' => $author]);//todo custom error
 
         $book = Book::findOrFail($bookId);
         $book['author_id'] = $author['id'];
@@ -89,7 +111,7 @@ class LibraryController extends Controller
      */
     public function delete($bookId)
     {
-        Book::find($bookId)->delete();
+        Book::find($bookId)->delete();//todo custom error
 
         return redirect()->route('library.home');
     }
