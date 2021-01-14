@@ -21,4 +21,5 @@ Route::prefix('/library')->group(function () {
     Route::get('/edit/{bookId}', [LibraryController::class, 'edit'])->name('library.edit');
     Route::post('/update/{bookId}', [LibraryController::class, 'update'])->name('library.update');
     Route::get('/delete/{bookId}', [LibraryController::class, 'delete'])->name('library.delete');
+    Route::get('/export', [LibraryController::class, 'export'])->name('library.export');
 });

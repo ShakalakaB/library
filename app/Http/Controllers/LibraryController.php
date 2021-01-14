@@ -55,7 +55,7 @@ class LibraryController extends Controller
         $title = trim($validatedData['title']);
         $author = trim($validatedData['author']);
 
-        $author = Author::stOrCreate(['name' => $author]);
+        $author = Author::firstOrCreate(['name' => $author]);
 
         Book::firstOrCreate([
             'title' => $title,
@@ -114,5 +114,10 @@ class LibraryController extends Controller
         Book::find($bookId)->delete();//todo custom error
 
         return redirect()->route('library.home');
+    }
+
+    public function export(Request $request)
+    {
+        $params = $request->all();
     }
 }
