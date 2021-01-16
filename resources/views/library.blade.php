@@ -22,19 +22,28 @@
         <!-- Styles -->
         <style>
             #storeBook {
-                background-color: lightgray;
+                background-color: rgb(222, 226, 230);
                 padding: 1em;
                 margin: 2em 0;
             }
             #export {
                 margin: 2em 0;
                 padding: 1em;
-                background-color: lightgray;
+                background-color: rgb(222, 226, 230);
             }
         </style>
     </head>
 
     <body>
+        @if ($errors->any())
+            <div class="alert alert-danger">
+                <ul>
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
         <div class="container">
             <div class="row" id="storeBook">
                 <h5>Add a book</h5>

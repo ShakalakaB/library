@@ -51,8 +51,8 @@ class LibraryController extends Controller
     {
         $validatedData = $request->validate([
             'title' => 'required|max:255',
-            'author' => 'required|max:255',
-        ]); //todo custom error
+            'author' => 'required|max:255'
+        ]);
 
         $title = trim($validatedData['title']);
         $author = trim($validatedData['author']);
@@ -74,7 +74,7 @@ class LibraryController extends Controller
      */
     public function edit($bookId)
     {
-        $book = Book::with('author')->find($bookId)->toArray();//todo custom error
+        $book = Book::with('author')->find($bookId)->toArray();
 
         $books = Book::with('author')->orderBy('created_at', 'desc')
             ->paginate(10)
@@ -93,11 +93,11 @@ class LibraryController extends Controller
     {
         $validatedData = $request->validate([
             'author' => 'required|max:255',
-        ]); //todo custom error
+        ]);
 
         $author = trim($validatedData['author']);
 
-        $author = Author::firstOrCreate(['name' => $author]);//todo custom error
+        $author = Author::firstOrCreate(['name' => $author]);
 
         $book = Book::findOrFail($bookId);
         $book['author_id'] = $author['id'];
@@ -113,7 +113,7 @@ class LibraryController extends Controller
      */
     public function delete($bookId)
     {
-        Book::find($bookId)->delete();//todo custom error
+        Book::findOrFail($bookId)->delete();
 
         return redirect()->route('library.home');
     }

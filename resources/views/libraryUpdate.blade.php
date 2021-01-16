@@ -18,7 +18,7 @@
         <!-- Styles -->
         <style>
             #updateBook {
-                background-color: lightgray;
+                background-color: rgb(222, 226, 230);
                 padding: 1em;
                 margin: 2em 0;
             }
