@@ -7,13 +7,15 @@ namespace App\Http\Controllers;
 use App\Models\Author;
 use App\Models\Book;
 use Illuminate\Http\Request;
+use Symfony\Component\Routing\Loader\XmlFileLoader;
 
-/**
- * Class LibraryController
- * @package App\Http\Controllers
- */
+
 class LibraryController extends Controller
 {
+    protected $exportFormat;
+    protected $exportFilepath;
+    protected $exportFile;
+
     /**
      * Get library index
      * @return \Illuminate\Contracts\View\View
@@ -118,6 +120,150 @@ class LibraryController extends Controller
 
     public function export(Request $request)
     {
-        $params = $request->all();
+        $validatedData = $request->validate([
+            'title' => 'string|nullable',
+            'author' => 'string|nullable',
+            'format' => 'required|in:csv,xml'
+        ]);
+
+        $this->exportFormat = $validatedData['format'];
+        $this->exportFilepath = __DIR__ . '/../../../storage/logs/export.' . $this->exportFormat;
+        $file = $this->openFile();
+        $writeCallback = $this->getWriteFileClosure();
+
+        if (isset($validatedData['title']) && !isset($validatedData['author'])) {
+            $this->writeCsvHeader([
+                'itemName' => 'header',
+                'itemValue' => ['ID', 'title', 'created_at']
+            ]);
+
+            Book::chunk(100, function ($books) use ($file, $writeCallback) {
+                foreach ($books as $book) {
+                    $item = [
+                        'itemName' => 'title',
+                        'itemValue' => [
+                            'ID' => $book['id'],
+                            'title' => $book['title'],
+                            'created_at' => $book['created_at']
+                        ]];
+
+                    $writeCallback($item, $file);
+                }
+            });
+
+            $this->closeFile();
+        }
+
+        if (!isset($validatedData['title']) && isset($validatedData['author'])) {
+            $this->writeCsvHeader([
+                'itemName' => 'header',
+                'itemValue' => ['ID', 'author', 'created_at']
+            ]);
+
+            Author::chunk(100, function ($authors) use ($file, $writeCallback) {
+                foreach ($authors as $author) {
+                    $item = [
+                        'itemName' => 'author',
+                        'itemValue' => [
+                            'ID' => $author['id'],
+                            'title' => $author['name'],
+                            'created_at' => $author['created_at']
+                        ]];
+
+                    $writeCallback($item, $file);
+                }
+            });
+
+            $this->closeFile();
+        }
+
+        if (isset($validatedData['title']) && isset($validatedData['author'])) {
+            $this->writeCsvHeader([
+                'itemName' => 'header',
+                'itemValue' => ['ID', 'title', 'author', 'created_at']
+            ]);
+
+            Book::with('author')->chunk(100, function ($books) use ($file, $writeCallback) {
+                foreach ($books as $book) {
+                    $item = [
+                        'itemName' => 'book',
+                        'itemValue' => [
+                            'ID' => $book['id'],
+                            'title' => $book['title'],
+                            'author' => $book['author']['name'],
+                            'created_at' => $book['created_at']
+                        ]];
+
+                    $writeCallback($item, $file);
+                }
+            });
+
+            $this->closeFile();
+        }
+
+        return response()->download($this->exportFilepath);
+    }
+
+    protected function openFile()
+    {
+        if ($this->exportFormat == 'csv') {
+            $this->exportFile = fopen($this->exportFilepath, 'w');
+        }
+
+        if ($this->exportFormat == 'xml') {
+            $this->exportFile = new \XMLWriter();
+            $this->exportFile->openUri($this->exportFilepath);
+            $this->exportFile->setIndent(true);
+            $this->exportFile->setIndentString('    ');
+            $this->exportFile->startDocument('1.0', 'UTF-8');
+            $this->exportFile->startElement('xml');
+        }
+
+        return $this->exportFile;
+    }
+
+    protected function getWriteFileClosure()
+    {
+        if ($this->exportFormat == 'csv') {
+            return function ($payload, $file) {
+                $data = array_values($payload['itemValue']);
+                fputcsv($file, $data);
+            };
+        }
+
+        if ($this->exportFormat == 'xml') {
+            return function ($payload, $file) {
+                $file->startElement($payload['itemName']);
+
+                foreach ($payload['itemValue'] as $key => $value) {
+                    $file->writeElement($key, $value);
+                }
+
+                $file->endElement();
+            };
+        }
+    }
+
+    protected function closeFile()
+    {
+        if ($this->exportFormat == 'csv') {
+            fclose($this->exportFile);
+        }
+
+        if ($this->exportFormat == 'xml') {
+            $this->exportFile->endElement();
+            $this->exportFile->endDocument();
+            $this->exportFile->flush();
+        }
+
+        return $this->exportFile;
+    }
+
+    protected function writeCsvHeader(array $header)
+    {
+        $writeCallback = $this->getWriteFileClosure();
+        $this->exportFormat == 'csv' && $writeCallback($header, $this->exportFile);
+
+        return $this;
     }
 }

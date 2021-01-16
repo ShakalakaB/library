@@ -26,9 +26,9 @@
     <body>
     <form action="{{ route('library.export') }}" method="GET">
         @csrf
-        <input type="checkbox" id="exportTitle" name="exportTitle" value=true>
+        <input type="checkbox" id="exportTitle" name="title" value="title">
         <label for="exportTitle">Book Title</label><br>
-        <input type="checkbox" id="exportAuthor" name="exportAuthor" value=true>
+        <input type="checkbox" id="exportAuthor" name="author" value="author">
         <label for="exportAuthor">Author</label><br>
         <label for="format">Export Format:</label>
         <select id="format" name="format">
@@ -54,7 +54,7 @@ $(document).ready(function () {
         checkedNum = $("input[type=checkbox]:checked").length;
 
         if (!checkedNum) {
-            alert("You must check at 'Book Title'/'Author'");
+            alert("You must at least check 'Book Title' or 'Author'");
             return false;
         }
     });
