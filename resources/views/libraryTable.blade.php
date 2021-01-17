@@ -1,18 +1,12 @@
-<table class="table table-striped table-hover">
+<table class="table table-striped table-hover" id="table" data-toolbar=".toolbar">
+    <thead>
     <tr>
-        <th scope="col">
-            Title
-            <a href="{{ route('library.index', ['orderBy' => 'title', 'order' => 'asc']) }}"><i class="bi bi-arrow-up"></i></a>
-            <a href="{{ route('library.index', ['orderBy' => 'title', 'order' => 'desc']) }}"><i class="bi bi-arrow-down"></i></a>
-        </th>
-        <th scope="col">
-            Author
-            <a href="{{ route('library.index', ['orderBy' => 'name', 'order' => 'asc']) }}"><i class="bi bi-arrow-up"></i></a>
-            <a href="{{ route('library.index', ['orderBy' => 'name', 'order' => 'desc']) }}"><i class="bi bi-arrow-down"></i></a>
-        </th>
-        <th scope="col">Action</th>
+        <th data-field="name" scope="col" data-sortable="true">Title</th>
+        <th data-field="author" scope="col" data-sortable="true">Author</th>
+        <th data-field="action" scope="col">Action</th>
     </tr>
-    @foreach ($books['data'] as $book)
+    </thead>
+    @foreach ($books as $book)
         <tr>
             <th scope="row">{{ $book['title'] ?? '' }}</th>
             <td>{{ $book['author']['name'] ?? ''}}</td>
@@ -23,3 +17,14 @@
         </tr>
     @endforeach
 </table>
+
+<script>
+    var $table = $('#table')
+
+    $(function () {
+        $table.bootstrapTable({
+            sortStable: true
+        })
+    })
+
+</script>

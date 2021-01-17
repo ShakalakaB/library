@@ -7,7 +7,6 @@ namespace App\Http\Controllers;
 use App\Models\Author;
 use App\Models\Book;
 use Illuminate\Http\Request;
-use Symfony\Component\Routing\Loader\XmlFileLoader;
 
 
 class LibraryController extends Controller
@@ -22,24 +21,19 @@ class LibraryController extends Controller
      */
     public function index(Request $request)
     {
-        $validatedData = $request->validate([
-            'orderBy' => 'in:name,title',
-            'order' => 'required_with:orderBy|in:asc,desc',
-            'page' => 'integer'
+        $title = trim( $request->input('title', ''));
+        $author = trim($request->input('author', ''));
+
+        $queryBuilder = $this->queryByTitleOrAuthor($title, $author);
+
+        $books = $queryBuilder->get()->toArray();
+
+        return view('library', [
+            'books' => $books,
+            'queryParams' => [
+                'title' => $title,
+                'author' => $author]
         ]);
-
-        if ($validatedData['orderBy'] ?? '') {
-            $books = Book::with('author')->join('authors', 'books.author_id', '=', 'authors.id')
-                ->orderBy($validatedData['orderBy'], $validatedData['order'])
-                ->paginate(10, 'books.*')
-                ->toArray();
-        } else {
-            $books = Book::with('author')->orderBy('created_at', 'desc')
-                ->paginate(10)
-                ->toArray();
-        }
-
-        return view('library', ['books' => $books]);
     }
 
     /**
@@ -77,7 +71,7 @@ class LibraryController extends Controller
         $book = Book::with('author')->find($bookId)->toArray();
 
         $books = Book::with('author')->orderBy('created_at', 'desc')
-            ->paginate(10)
+            ->get()
             ->toArray();
 
         return view('libraryUpdate', ['books' => $books, 'editBook' => $book]);
@@ -123,7 +117,9 @@ class LibraryController extends Controller
         $validatedData = $request->validate([
             'title' => 'string|nullable',
             'author' => 'string|nullable',
-            'format' => 'required|in:csv,xml'
+            'format' => 'required|in:csv,xml',
+            'queryTitle' => 'nullable',
+            'queryAuthor' => 'nullable'
         ]);
 
         $this->exportFormat = $validatedData['format'];
@@ -131,13 +127,15 @@ class LibraryController extends Controller
         $file = $this->openFile();
         $writeCallback = $this->getWriteFileClosure();
 
+        $queryBuilder = $this->queryByTitleOrAuthor($validatedData['queryTitle'],$validatedData['queryAuthor']);
+
         if (isset($validatedData['title']) && !isset($validatedData['author'])) {
             $this->writeCsvHeader([
                 'itemName' => 'header',
                 'itemValue' => ['ID', 'title', 'created_at']
             ]);
 
-            Book::chunk(100, function ($books) use ($file, $writeCallback) {
+            $queryBuilder->chunk(100, function ($books) use ($file, $writeCallback) {
                 foreach ($books as $book) {
                     $item = [
                         'itemName' => 'title',
@@ -160,14 +158,14 @@ class LibraryController extends Controller
                 'itemValue' => ['ID', 'author', 'created_at']
             ]);
 
-            Author::chunk(100, function ($authors) use ($file, $writeCallback) {
-                foreach ($authors as $author) {
+            $queryBuilder->chunk(100, function ($books) use ($file, $writeCallback) {
+                foreach ($books as $book) {
                     $item = [
                         'itemName' => 'author',
                         'itemValue' => [
-                            'ID' => $author['id'],
-                            'title' => $author['name'],
-                            'created_at' => $author['created_at']
+                            'ID' => $book['author']['id'],
+                            'title' => $book['author']['name'],
+                            'created_at' => $book['author']['created_at']
                         ]];
 
                     $writeCallback($item, $file);
@@ -183,7 +181,7 @@ class LibraryController extends Controller
                 'itemValue' => ['ID', 'title', 'author', 'created_at']
             ]);
 
-            Book::with('author')->chunk(100, function ($books) use ($file, $writeCallback) {
+            $queryBuilder->chunk(100, function ($books) use ($file, $writeCallback) {
                 foreach ($books as $book) {
                     $item = [
                         'itemName' => 'book',
@@ -265,5 +263,34 @@ class LibraryController extends Controller
         $this->exportFormat == 'csv' && $writeCallback($header, $this->exportFile);
 
         return $this;
+    }
+
+    protected function queryByTitleOrAuthor($title, $author)
+    {
+        if ($title && !$author) {
+            $queryBuilder = Book::with('author')
+                ->where('title', 'like', "%{$title}%");
+        }
+
+        if (!$title && $author) {
+            $queryBuilder = Book::with('author')
+                ->whereHas('author', function ($query) use ($author) {
+                    $query->where('name', 'like', "%{$author}%");
+                });
+        }
+
+        if ($title && $author) {
+            $queryBuilder = Book::with('author')
+                ->where('title', 'like', "%{$title}%")
+                ->whereHas('author', function ($query) use ($author) {
+                    $query->where('name', 'like', "%{$author}%");
+                });
+        }
+
+        if (!$title && !$author) {
+            $queryBuilder = Book::with('author')->orderBy('created_at', 'desc');
+        }
+
+        return $queryBuilder;
     }
 }
