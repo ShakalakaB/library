@@ -8,4 +8,11 @@ Yaraku Case Study
 + Export data in csv/xml format
 + Provide test for the main functions.
 
+### How to deploy the application
++ Clone the [git repository](https://github.com/ShakalakaB/library.git)
++ Run composer install
++ Copy the '.env.example' as '.env', and change the DB_CONNECTION settings
++ Run `php artisan migrate`
++ Create an nginx configuration file for nginx server
+
 Thank you for reviewing my code, and look forward to receiving feedback.
