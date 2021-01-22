@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LibraryController;
+use App\Http\Controllers\TestController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -23,3 +24,5 @@ Route::prefix('/library')->group(function () {
     Route::get('/delete/{bookId}', [LibraryController::class, 'delete'])->name('library.delete');
     Route::get('/export', [LibraryController::class, 'export'])->name('library.export');
 });
+
+Route::get('/test',  [TestController::class, 'test']);
